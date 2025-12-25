@@ -3,8 +3,8 @@ name: Release
 on:
   push:
     tags:
-      - 'v*'  # Trigger on version tags like v1.0.0
-  workflow_dispatch:  # Allow manual triggering
+      - "v*" # Trigger on version tags like v1.0.0
+  workflow_dispatch: # Allow manual triggering
 
 jobs:
   build:
@@ -49,28 +49,28 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: 'go.mod'
+          go-version-file: "go.mod"
 
       - name: Build
         env:
           GOOS: ${{ matrix.goos }}
           GOARCH: ${{ matrix.goarch }}
         run: |
-          go build -o pdf-extractor${{ matrix.ext }} main.go
-          mv pdf-extractor${{ matrix.ext }} pdf-extractor-${{ matrix.name }}${{ matrix.ext }}
+          mkdir -p releases
+          go build -o releases/epstein-files-defornicator-${{ matrix.name }}${{ matrix.ext }} main.go
 
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: pdf-extractor-${{ matrix.name }}
-          path: pdf-extractor-${{ matrix.name }}${{ matrix.ext }}
+          name: epstein-files-defornicator-${{ matrix.name }}
+          path: releases/epstein-files-defornicator-${{ matrix.name }}${{ matrix.ext }}
 
   release:
     name: Create Release
     needs: build
     runs-on: ubuntu-latest
     if: startsWith(github.ref, 'refs/tags/')
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -78,27 +78,28 @@ jobs:
       - name: Download all artifacts
         uses: actions/download-artifact@v4
         with:
-          path: ./artifacts
+          path: ./releases
 
       - name: Get tag name
         id: tag
         run: echo "TAG_NAME=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
-      - name: List artifacts
+      - name: List release files
         run: |
-          find ./artifacts -type f -name "pdf-extractor-*" | sort
+          echo "Release files:"
+          find ./releases -type f -name "epstein-files-defornicator-*" | sort
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: ./artifacts/**/pdf-extractor-*
+          files: ./releases/**/epstein-files-defornicator-*
           tag_name: ${{ steps.tag.outputs.TAG_NAME }}
           name: Release ${{ steps.tag.outputs.TAG_NAME }}
           body: |
             ## Release ${{ steps.tag.outputs.TAG_NAME }}
-            
+
             Pre-built binaries for multiple platforms.
-            
+
             ### Downloads
             - Windows (amd64, 386)
             - Linux (amd64, 386, arm64)
@@ -107,4 +108,3 @@ jobs:
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-

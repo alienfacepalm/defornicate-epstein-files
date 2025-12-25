@@ -1,0 +1,39 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+pdf-extractor
+pdf-extractor-*
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool
+*.out
+
+# Dependency directories
+vendor/
+
+# Go workspace file
+go.work
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# PDFs and extracted text (optional - remove if you want to track them)
+pdfs/*.pdf
+pdfs/*.extracted.txt
+
+# Config with sensitive data (optional - keep config.json.example instead)
+# config.json
+

@@ -131,6 +131,17 @@ func run() int {
 		} else {
 			// Resolve local file path (handles filenames in documents directory)
 			filePath = pathutil.ResolveDocumentPath(input)
+			
+			// Check if the resolved file exists
+			if _, err := os.Stat(filePath); os.IsNotExist(err) {
+				fmt.Fprintf(os.Stderr, "Error: file does not exist: %s\n", filePath)
+				if len(inputs) == 1 {
+					return 1
+				}
+				hasErrors = true
+				errorCount++
+				continue
+			}
 		}
 
 		// Extract text from document

@@ -16,14 +16,16 @@ type Extractor struct {
 	outputFormat string // "json", "markdown", or "plain"
 }
 
-// New creates a new Extractor instance with default plain text format
+// New creates a new Extractor instance with default JSON format
 func New() *Extractor {
 	return &Extractor{
 		outputFormat: "json", // Default to JSON for structured output
 	}
 }
 
-// NewWithFormat creates a new Extractor instance with specified format
+// NewWithFormat creates a new Extractor instance with specified format.
+// Valid formats: "json", "markdown", "plain"
+// This function is available for future use when format selection is needed.
 func NewWithFormat(format string) *Extractor {
 	validFormats := map[string]bool{"json": true, "markdown": true, "plain": true}
 	if !validFormats[format] {
@@ -154,7 +156,7 @@ func (e *Extractor) SaveExtractedText(filePath string, text string) (string, err
 	}
 	
 	// Write the formatted content to the file
-	err = os.WriteFile(extractedPath, content, 0644)
+	err = os.WriteFile(extractedPath, content, 0644) // Use DefaultFilePerm constant if we had access to it
 	if err != nil {
 		return "", fmt.Errorf("failed to write extracted text file: %w", err)
 	}
@@ -173,7 +175,7 @@ func (e *Extractor) savePlainText(filePath string, text string) (string, error) 
 	baseNameNoExt = strings.TrimSuffix(baseNameNoExt, strings.ToUpper(ext))
 	extractedPath := filepath.Join(dir, baseNameNoExt+".extracted.txt")
 	
-	err := os.WriteFile(extractedPath, []byte(text), 0644)
+	err := os.WriteFile(extractedPath, []byte(text), 0644) // Use DefaultFilePerm constant if we had access to it
 	if err != nil {
 		return "", fmt.Errorf("failed to write extracted text file: %w", err)
 	}

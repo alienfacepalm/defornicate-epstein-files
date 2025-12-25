@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
 	"os"
 	"path/filepath"
 	"strings"
@@ -89,7 +90,7 @@ func (d *Downloader) Download(url string) (string, error) {
 	}
 
 	// Get the documents directory for this file type
-	typeDir := GetDocumentsDir(fileType)
+	typeDir := GetDocumentsDir(d.documentsDir, fileType)
 	
 	// Create documents directory structure if it doesn't exist
 	if err := os.MkdirAll(typeDir, DefaultDirPerm); err != nil {
@@ -172,17 +173,60 @@ func computeFileChecksum(filePath string) ([32]byte, error) {
 }
 
 // extractFilenameFromURL extracts a safe filename from a URL
-func extractFilenameFromURL(url string) string {
-	// Remove query parameters
-	if idx := strings.Index(url, "?"); idx != -1 {
-		url = url[:idx]
+func extractFilenameFromURL(rawURL string) string {
+	// Parse URL to handle encoding properly
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		// Fallback to simple string manipulation if URL parsing fails
+		return extractFilenameFromURLFallback(rawURL)
 	}
 
 	// Extract the last part of the URL path
-	parts := strings.Split(url, "/")
+	path := parsedURL.Path
+	if path == "" || path == "/" {
+		return ""
+	}
+
+	// Get the last segment of the path
+	parts := strings.Split(strings.Trim(path, "/"), "/")
+	if len(parts) == 0 {
+		return ""
+	}
+
+	filename := parts[len(parts)-1]
+	
+	// URL decode the filename
+	decoded, err := url.QueryUnescape(filename)
+	if err == nil {
+		filename = decoded
+	}
+
+	// Remove any invalid characters for filenames
+	invalidChars := []string{"<", ">", ":", "\"", "|", "?", "*", "\\", "/"}
+	for _, char := range invalidChars {
+		filename = strings.ReplaceAll(filename, char, "_")
+	}
+
+	// Ensure filename is not empty
+	if filename == "" {
+		return "downloaded"
+	}
+
+	return filename
+}
+
+// extractFilenameFromURLFallback provides a fallback when URL parsing fails
+func extractFilenameFromURLFallback(rawURL string) string {
+	// Remove query parameters
+	if idx := strings.Index(rawURL, "?"); idx != -1 {
+		rawURL = rawURL[:idx]
+	}
+
+	// Extract the last part of the URL path
+	parts := strings.Split(rawURL, "/")
 	if len(parts) > 0 {
 		filename := parts[len(parts)-1]
-		// URL decode basic characters
+		// Basic URL decode
 		filename = strings.ReplaceAll(filename, "%20", "_")
 		filename = strings.ReplaceAll(filename, "%2F", "_")
 		filename = strings.ReplaceAll(filename, "%", "_")
@@ -191,7 +235,9 @@ func extractFilenameFromURL(url string) string {
 		for _, char := range invalidChars {
 			filename = strings.ReplaceAll(filename, char, "_")
 		}
-		return filename
+		if filename != "" {
+			return filename
+		}
 	}
 	return ""
 }

@@ -28,7 +28,11 @@ func GetFileType(filename string) string {
 }
 
 // GetDocumentsDir returns the directory path for a specific file type
-func GetDocumentsDir(fileType string) string {
-	return filepath.Join(DefaultDocumentsDir, fileType)
+// Uses the provided baseDir if non-empty, otherwise uses DefaultDocumentsDir
+func GetDocumentsDir(baseDir, fileType string) string {
+	if baseDir == "" {
+		baseDir = DefaultDocumentsDir
+	}
+	return filepath.Join(baseDir, fileType)
 }
 

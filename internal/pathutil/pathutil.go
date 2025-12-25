@@ -13,7 +13,10 @@ const (
 )
 
 // GetFileType determines the file type from a filename
+// Uses the same logic as downloader.GetFileType for consistency
 func GetFileType(filename string) string {
+	// Import downloader's GetFileType to avoid duplication
+	// For now, we'll keep a local implementation but make it consistent
 	ext := strings.ToLower(filepath.Ext(filename))
 	
 	// Map extensions to file types

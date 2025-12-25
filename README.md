@@ -55,6 +55,7 @@ See [docs/CONTRIBUTING.md](docs/CONTRIBUTING.md) for development setup and guide
 - **[Project Structure](docs/PROJECT_STRUCTURE.md)** - Code organization and architecture
 - **[Release Guide](docs/RELEASE.md)** - How to create releases
 - **[Changelog](docs/CHANGELOG.md)** - Version history and changes
+- **[TODO](docs/TODO.md)** - Planned features and implementation roadmap
 
 ## Usage
 

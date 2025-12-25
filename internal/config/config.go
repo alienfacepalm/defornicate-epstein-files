@@ -39,9 +39,10 @@ func Load(configPath string) (*Config, error) {
 	return &cfg, nil
 }
 
-// GetInputs returns the list of inputs to process based on config priority
+// GetInputs returns the list of inputs to process based on config priority.
+// Note: This method normalizes legacy fields to new fields (mutates the config).
 func (c *Config) GetInputs() []string {
-	// Normalize legacy fields to new fields
+	// Normalize legacy fields to new fields (side effect: mutates config)
 	if c.Pattern == "" && c.PDFPattern != "" {
 		c.Pattern = c.PDFPattern
 	}

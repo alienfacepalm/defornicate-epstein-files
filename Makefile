@@ -30,35 +30,35 @@ build-release: ## Build release binaries for all platforms
 	@echo "Building release binaries..."
 	@if not exist $(RELEASE_DIR) mkdir $(RELEASE_DIR)
 	@echo "Building Windows amd64..."
-	@GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-windows-amd64.exe $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='windows'; $$env:GOARCH='amd64'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-windows-amd64.exe $(MAIN_PATH)"
 	@echo "Building Windows 386..."
-	@GOOS=windows GOARCH=386 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-windows-386.exe $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='windows'; $$env:GOARCH='386'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-windows-386.exe $(MAIN_PATH)"
 	@echo "Building Linux amd64..."
-	@GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-linux-amd64 $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='linux'; $$env:GOARCH='amd64'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-linux-amd64 $(MAIN_PATH)"
 	@echo "Building Linux 386..."
-	@GOOS=linux GOARCH=386 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-linux-386 $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='linux'; $$env:GOARCH='386'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-linux-386 $(MAIN_PATH)"
 	@echo "Building Linux arm64..."
-	@GOOS=linux GOARCH=arm64 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-linux-arm64 $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='linux'; $$env:GOARCH='arm64'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-linux-arm64 $(MAIN_PATH)"
 	@echo "Building macOS amd64..."
-	@GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-darwin-amd64 $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='darwin'; $$env:GOARCH='amd64'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-darwin-amd64 $(MAIN_PATH)"
 	@echo "Building macOS arm64..."
-	@GOOS=darwin GOARCH=arm64 $(GOBUILD) -o $(RELEASE_DIR)/$(BINARY_NAME)-darwin-arm64 $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='darwin'; $$env:GOARCH='arm64'; go build -o $(RELEASE_DIR)/$(BINARY_NAME)-darwin-arm64 $(MAIN_PATH)"
 	@echo "Release binaries built in $(RELEASE_DIR)/"
 
 build-windows: ## Build Windows binary
 	@echo "Building Windows binary..."
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
-	GOOS=windows GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME).exe $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='windows'; $$env:GOARCH='amd64'; go build -o $(BUILD_DIR)/$(BINARY_NAME).exe $(MAIN_PATH)"
 
 build-linux: ## Build Linux binary
 	@echo "Building Linux binary..."
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
-	GOOS=linux GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)-linux $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='linux'; $$env:GOARCH='amd64'; go build -o $(BUILD_DIR)/$(BINARY_NAME)-linux $(MAIN_PATH)"
 
 build-darwin: ## Build macOS binary
 	@echo "Building macOS binary..."
 	@if not exist $(BUILD_DIR) mkdir $(BUILD_DIR)
-	GOOS=darwin GOARCH=amd64 $(GOBUILD) -o $(BUILD_DIR)/$(BINARY_NAME)-darwin $(MAIN_PATH)
+	@powershell -Command "$$env:GOOS='darwin'; $$env:GOARCH='amd64'; go build -o $(BUILD_DIR)/$(BINARY_NAME)-darwin $(MAIN_PATH)"
 
 test: ## Run tests
 	@echo "Running tests..."

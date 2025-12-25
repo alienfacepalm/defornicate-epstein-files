@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"defornicate-epstein-files/internal/config"
@@ -16,6 +17,39 @@ const (
 	configFile = "epstein-files-urls.json"
 )
 
+// findConfigFile searches for the config file in multiple locations:
+// 1. Current working directory
+// 2. Directory where the executable is located
+// 3. Parent directory of the executable (for bin/ structure)
+func findConfigFile() string {
+	// Try current working directory first
+	if _, err := os.Stat(configFile); err == nil {
+		return configFile
+	}
+
+	// Get the executable's directory
+	execPath, err := os.Executable()
+	if err == nil {
+		execDir := filepath.Dir(execPath)
+		
+		// Try in executable's directory
+		configPath := filepath.Join(execDir, configFile)
+		if _, err := os.Stat(configPath); err == nil {
+			return configPath
+		}
+
+		// Try parent directory (for bin/ structure)
+		parentDir := filepath.Dir(execDir)
+		configPath = filepath.Join(parentDir, configFile)
+		if _, err := os.Stat(configPath); err == nil {
+			return configPath
+		}
+	}
+
+	// Fall back to current directory (will fail gracefully if not found)
+	return configFile
+}
+
 func main() {
 	os.Exit(run())
 }
@@ -25,7 +59,8 @@ func run() int {
 	var inputs []string
 
 	// Try to load config file first
-	cfg, err := config.Load(configFile)
+	configPath := findConfigFile()
+	cfg, err := config.Load(configPath)
 	if err == nil {
 		// Check for pattern first (expands to multiple URLs)
 		patternStr := cfg.Pattern
@@ -64,6 +99,7 @@ func run() int {
 
 	// Process each input
 	var hasErrors bool
+	var successCount, errorCount int
 	for i, input := range inputs {
 		if len(inputs) > 1 {
 			fmt.Fprintf(os.Stderr, "\n--- Processing %d of %d ---\n", i+1, len(inputs))
@@ -85,10 +121,12 @@ func run() int {
 						return 1
 					}
 					hasErrors = true
+					errorCount++
 					continue
 				}
 			} else {
 				fmt.Fprintf(os.Stderr, "Document saved to: %s\n", filePath)
+				successCount++
 			}
 		} else {
 			// Resolve local file path (handles filenames in documents directory)
@@ -103,6 +141,7 @@ func run() int {
 				return 1
 			}
 			hasErrors = true
+			errorCount++
 			continue
 		}
 
@@ -114,9 +153,11 @@ func run() int {
 				return 1
 			}
 			hasErrors = true
+			errorCount++
 			continue
 		}
 		fmt.Fprintf(os.Stderr, "Extracted text saved to: %s\n", extractedFilePath)
+		successCount++
 
 		// Also output the extracted text to stdout
 		if len(inputs) > 1 {
@@ -125,6 +166,16 @@ func run() int {
 		fmt.Print(text)
 		if len(inputs) > 1 && i < len(inputs)-1 {
 			fmt.Print("\n\n")
+		}
+	}
+
+	// Print summary if processing multiple files
+	if len(inputs) > 1 {
+		fmt.Fprintf(os.Stderr, "\n--- Summary ---\n")
+		fmt.Fprintf(os.Stderr, "Total processed: %d\n", len(inputs))
+		fmt.Fprintf(os.Stderr, "Successful: %d\n", successCount)
+		if errorCount > 0 {
+			fmt.Fprintf(os.Stderr, "Errors: %d\n", errorCount)
 		}
 	}
 

@@ -17,7 +17,8 @@ const (
 	// DefaultTimeout is the default HTTP client timeout
 	DefaultTimeout = 30 * time.Second
 	// DefaultUserAgent is the user agent string for HTTP requests
-	DefaultUserAgent = "epstein-files-defornicator/1.0"
+	// Using a browser-like User-Agent to avoid being blocked by servers
+	DefaultUserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
 	// DefaultDocumentsDir is the default parent directory for storing documents
 	DefaultDocumentsDir = "documents"
 	// DefaultFilePerm is the default file permission (0644)
@@ -46,12 +47,21 @@ func New(documentsDir string) *Downloader {
 
 // Download downloads a document from a URL, checking checksums to avoid duplicates
 func (d *Downloader) Download(url string) (string, error) {
-	// Create request with user agent
+	// Create request with browser-like headers to avoid being blocked
 	req, err := http.NewRequest("GET", url, nil)
 	if err != nil {
 		return "", fmt.Errorf("failed to create request: %w", err)
 	}
 	req.Header.Set("User-Agent", d.userAgent)
+	req.Header.Set("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7")
+	req.Header.Set("Accept-Language", "en-US,en;q=0.9")
+	req.Header.Set("Accept-Encoding", "gzip, deflate, br")
+	req.Header.Set("Connection", "keep-alive")
+	req.Header.Set("Upgrade-Insecure-Requests", "1")
+	req.Header.Set("Sec-Fetch-Dest", "document")
+	req.Header.Set("Sec-Fetch-Mode", "navigate")
+	req.Header.Set("Sec-Fetch-Site", "none")
+	req.Header.Set("Sec-Fetch-User", "?1")
 
 	// Make request
 	resp, err := d.client.Do(req)
